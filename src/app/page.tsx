@@ -4,34 +4,39 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 
 export default function Home() {
+  const [logs, setLogs] = useState<string[]>([])
   const [user, setUser] = useState<any>(null)
+
+  const addLog = (msg: string) => {
+    setLogs((prev) => [...prev, msg])
+  }
 
   useEffect(() => {
     const initTelegram = async () => {
       if (typeof window !== 'undefined') {
-        console.log('WINDOW OK')
+        addLog('WINDOW OK')
 
         if ((window as any).Telegram) {
-          console.log('Telegram FOUND')
+          addLog('Telegram FOUND')
 
           const tg = (window as any).Telegram.WebApp
           tg.ready()
 
           const initData = tg.initData
-          console.log('INIT DATA:', initData)
+          addLog('INIT DATA: ' + initData.slice(0, 50))
 
           try {
             const res = await axios.post('/api/auth/telegram', {
               initData
             })
 
-            console.log('API RESPONSE:', res.data)
+            addLog('API SUCCESS')
             setUser(res.data)
-          } catch (err) {
-            console.log('Auth Error:', err)
+          } catch (err: any) {
+            addLog('API ERROR: ' + err.message)
           }
         } else {
-          console.log('Telegram NOT found')
+          addLog('Telegram NOT FOUND')
         }
       }
     }
@@ -40,16 +45,23 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="h-screen flex items-center justify-center bg-black text-white">
+    <div className="min-h-screen bg-black text-white p-4">
       {user ? (
-        <div className="text-center">
-          <h1 className="text-2xl mb-2">Welcome 🚀</h1>
+        <div>
+          <h1 className="text-xl mb-2">Welcome 🚀</h1>
           <p>Name: {user.name}</p>
-          <p>Telegram ID: {user.telegram_id}</p>
-          <p>Username: {user.username}</p>
+          <p>ID: {user.telegram_id}</p>
         </div>
       ) : (
-        <h1 className="text-2xl">Loading...</h1>
+        <div>
+          <h1 className="text-xl mb-4">Loading...</h1>
+
+          <div className="text-sm bg-gray-900 p-3 rounded">
+            {logs.map((log, i) => (
+              <p key={i}>{log}</p>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )
