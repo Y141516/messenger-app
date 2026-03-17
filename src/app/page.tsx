@@ -8,20 +8,30 @@ export default function Home() {
 
   useEffect(() => {
     const initTelegram = async () => {
-      if (typeof window !== 'undefined' && (window as any).Telegram) {
-        const tg = (window as any).Telegram.WebApp
-        tg.ready()
+      if (typeof window !== 'undefined') {
+        console.log('WINDOW OK')
 
-        const initData = tg.initData
+        if ((window as any).Telegram) {
+          console.log('Telegram FOUND')
 
-        try {
-          const res = await axios.post('/api/auth/telegram', {
-            initData
-          })
+          const tg = (window as any).Telegram.WebApp
+          tg.ready()
 
-          setUser(res.data)
-        } catch (err) {
-          console.log('Auth Error', err)
+          const initData = tg.initData
+          console.log('INIT DATA:', initData)
+
+          try {
+            const res = await axios.post('/api/auth/telegram', {
+              initData
+            })
+
+            console.log('API RESPONSE:', res.data)
+            setUser(res.data)
+          } catch (err) {
+            console.log('Auth Error:', err)
+          }
+        } else {
+          console.log('Telegram NOT found')
         }
       }
     }
