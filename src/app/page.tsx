@@ -6,24 +6,21 @@ export default function Home() {
   const [status, setStatus] = useState("Loading...")
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      console.log("WINDOW OK")
+    const checkTelegram = () => {
+      const tg = (window as any)?.Telegram?.WebApp
 
-      const tg = (window as any).Telegram?.WebApp
-
-      if (tg) {
-        console.log("Telegram FOUND")
-
+      if (tg && tg.initData) {
         tg.ready()
         tg.expand()
-
         setStatus("Telegram FOUND ✅")
         console.log("INIT DATA:", tg.initData)
       } else {
-        console.log("Telegram NOT FOUND")
-        setStatus("Telegram NOT FOUND ❌")
+        setStatus("Waiting for Telegram...")
+        setTimeout(checkTelegram, 500) // retry
       }
     }
+
+    checkTelegram()
   }, [])
 
   return (
