@@ -1,30 +1,30 @@
 "use client"
-
 import { useEffect, useState } from "react"
-import { init, viewport } from "@telegram-apps/sdk"
 
 export default function Home() {
   const [status, setStatus] = useState("Loading...")
 
   useEffect(() => {
-    try {
-      init()
-
-      if (viewport.isExpanded()) {
+    // Poll every 200ms until Telegram WebApp object exists
+    const interval = setInterval(() => {
+      const tg = (window as any)?.Telegram?.WebApp
+      if (tg) {
+        tg.ready()        // marks WebApp as ready
+        tg.expand()       // expands the WebApp to full height
         setStatus("Telegram FOUND ✅")
-      } else {
-        setStatus("Opened outside Telegram ❌")
+        clearInterval(interval)
+        console.log("Telegram initData:", tg.initData)
       }
-    } catch (e) {
-      console.log(e)
-      setStatus("Telegram NOT DETECTED ❌")
-    }
+    }, 200)
+
+    return () => clearInterval(interval)
   }, [])
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Messenger App 🚀</h1>
       <p>{status}</p>
+      {status === "Loading..." && <p>Please open this inside the Telegram mobile app using the Open button.</p>}
     </div>
   )
 }
